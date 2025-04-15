@@ -53,31 +53,5 @@ class HTMLNode ():
                 self.children == other.children and
                 self.props == other.props)
     
-class LeafNode(HTMLNode):
-    """
-    A class representing a leaf HTML node.
-    
-    Attributes:
-        tag (str): The tag name of the HTML element.
-        value (str): The text content of the HTML element.
-        props (dict): A dictionary of attributes for the HTML element.
-    """
-    
-    def __init__(self, tag, value):
-        super().__init__(tag, value)
-        self.props = {}
-        self.children = []
-        self.tag = tag
-        self.value = value
 
-    def to_html(self):
-        """
-        Converts the LeafNode to an HTML string.
-        
-        Returns:
-            str: The HTML representation of the LeafNode.
-        """
-        if self.value == "":
-            raise ValueError("LeafNode value cannot be empty")
-        return f"<{self.tag}{self.prop_to_html()}>{self.value}</{self.tag}>"
     
