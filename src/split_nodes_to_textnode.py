@@ -70,7 +70,7 @@ def split_nodes_image(old_nodes):
 def split_nodes_link(old_nodes):
     new_nodes = []
     if old_nodes == [] or old_nodes is None or old_nodes is [None]:
-        print("old_nodes is empty")
+        #print("old_nodes is empty")
         return []
     if isinstance(old_nodes[0], str):
         return [TextNode(old_nodes[0])]
@@ -98,7 +98,7 @@ def split_nodes_link(old_nodes):
                 raise ValueError("Unknown text type")
     return new_nodes
 
-def main():
+#def main():
     old_nodes = [TextNode("This is an image ![image](https://example.com/image.png) and this is more text. OH! Here's another image ![image2](https://example.com/image.png) and trailing text", TextType.TEXT)]
     new_nodes = split_nodes_image(old_nodes)
     print("Image nodes:")
@@ -121,4 +121,4 @@ def main():
     for node in new_nodes:
         print(node)
 
-main()
+#main()
