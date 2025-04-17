@@ -41,7 +41,6 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("world", TextType.BOLD),
             TextNode("! How are ", TextType.TEXT),
             TextNode("you?", TextType.BOLD),
-            TextNode("",TextType.TEXT)
         ]
         self.assertEqual(new_nodes, expected)    
 
