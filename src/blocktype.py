@@ -24,7 +24,6 @@ def block_to_block_type(block):
     if not isinstance(block, str):
         # Check if block is a string
         # This will also check for int and float types
-        # If block is a string, it will be converted to str
         # If block is not a string, it will raise TypeError
         raise TypeError("block must be a string")
     
