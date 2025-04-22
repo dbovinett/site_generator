@@ -9,7 +9,7 @@ class BlockType(Enum):
     UNORDERED_LIST = "ul"
     ORDERED_LIST = "ol"
 
-def block_to_block_type(block):
+def block_to_block_type(block:str) -> BlockType:
     """
     Convert a block of text to its corresponding block type.
     

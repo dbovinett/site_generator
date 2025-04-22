@@ -14,6 +14,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     if old_nodes == [] or old_nodes is None or old_nodes is [None]:
         #print("old_nodes is empty")
         return []
+    if not isinstance(old_nodes, list):
+        #print("old_nodes is not a list")
+        raise TypeError("old_nodes must be a list")
     if isinstance(old_nodes[0], str):
         #print("old_nodes[0] is a string, not TextNode")
         return [TextNode(old_nodes[0])]
