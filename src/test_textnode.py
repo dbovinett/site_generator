@@ -57,12 +57,12 @@ class TestTextNode(unittest.TestCase):
 
     def test_text_node_to_html_node_link(self):
         node = TextNode("This is a link", TextType.LINK, "https://example.com")
-        expected_html_node = LeafNode("a", "This is a link", "href:'https://example.com'")
+        expected_html_node = LeafNode("a", "This is a link", {"href":'https://example.com'})
         self.assertEqual(text_node_to_html_node(node), expected_html_node)
 
     def test_text_node_to_html_node_image(self):
         node = TextNode("This is an image", TextType.IMAGE, "https://example.com/image.png")
-        expected_html_node = LeafNode("img", ["src:'https://example.com/image.png'", "alt:'This is an image'"])
+        expected_html_node = LeafNode("img","",{"src":'https://example.com/image.png', "alt":'This is an image'})
         self.assertEqual(text_node_to_html_node(node), expected_html_node)
 
     def test_text_node_to_html_node_invalid_type(self):

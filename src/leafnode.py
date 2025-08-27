@@ -30,6 +30,7 @@ class LeafNode(HTMLNode):
             raise ValueError("LeafNode value cannot be None")
         
         if self.tag is None or self.tag == "":
+            #print("Warning: LeafNode tag is None or empty")
             return self.value
         
         return f"<{self.tag}{self.prop_to_html()}>{self.value}</{self.tag}>"

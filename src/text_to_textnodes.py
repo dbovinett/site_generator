@@ -1,7 +1,7 @@
 from split_nodes_to_textnode import split_nodes_delimiter, split_nodes_image, split_nodes_link
 from textnode import TextNode, TextType
 
-def text_to_textnodes(text):
+def text_to_textnodes(text) -> list[TextNode]:
     #print("text_to_textnodes entered, text:", text)
     """
     Convert a string of text to a list of TextNode objects.
@@ -11,12 +11,13 @@ def text_to_textnodes(text):
         #raise TypeError("text must be a string")
     if text == "" or text is None:
         return []
+    new_nodes = [TextNode(text)]
     # Split the text into nodes based on the type of text
-    new_nodes = split_nodes_delimiter(text, "`", TextType.TEXT)
+    new_nodes = split_nodes_delimiter(new_nodes, "`", TextType.TEXT)
     #print("new_nodes after split_nodes_delimiter `", new_nodes)
     new_nodes = split_nodes_delimiter(new_nodes, "**", TextType.TEXT)
     #print("new_nodes after split_nodes_delimiter **", new_nodes)
-    new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.TEXT)
+    new_nodes = split_nodes_delimiter(new_nodes, "_" , TextType.TEXT)
     #print("new_nodes after split_nodes_delimiter _", new_nodes)
     
     new_nodes = split_nodes_image(new_nodes)

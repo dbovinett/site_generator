@@ -18,7 +18,7 @@ class TestTextToTextNodes(unittest.TestCase):
     def test_bold_text(self):
         text = "**Hello, world!**"
         expected = [TextNode("Hello, world!", TextType.BOLD)]
-        self.assertEqual(text_to_textnodes([TextNode(text)]), expected)
+        self.assertEqual(text_to_textnodes(text), expected)
     
     def test_italic_text(self):
         text = "_Hello, world!_"

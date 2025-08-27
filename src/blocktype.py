@@ -35,7 +35,7 @@ def block_to_block_type(block:str) -> BlockType:
         return BlockType.CODE
     elif len(re.findall(r"^>", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
         return BlockType.QUOTE
-    elif len(re.findall(r"^-", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
+    elif len(re.findall(r"[\-\*]", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
         return BlockType.UNORDERED_LIST
     elif len(re.findall(r"^\d+\.\s", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
         return BlockType.ORDERED_LIST
