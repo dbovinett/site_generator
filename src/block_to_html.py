@@ -68,14 +68,15 @@ def code_to_html_node(block):
     
     # Check for closing fence
     if lines and lines[-1].strip().endswith("```"):
-        end_idx = -1
+        end_idx = len(lines) - 1
     
     # Extract the content lines
     content_lines = lines[start_idx:end_idx]
+    #print(f"\nCode Lines: {content_lines}\n")
     
     # Join with newlines to preserve formatting
     content = "\n".join(content_lines)
-    print(content)
+    #print(f"Code Content: {content}")
     
     # Create a TextNode with the content
     text_node = TextNode(content, TextType.TEXT)
@@ -84,6 +85,8 @@ def code_to_html_node(block):
     code_node = text_node_to_html_node(text_node)
     
     # Create a pre node with the code node as its child
+    #result = ParentNode("pre", [ParentNode("code", [code_node])])
+    #print(f"Code HTML: {result.to_html()}")
     return ParentNode("pre", [ParentNode("code", [code_node])])
 
 def quote_to_html_node(block):
@@ -98,47 +101,100 @@ def quote_to_html_node(block):
     return ParentNode(BlockType.QUOTE.value, html_nodes)
 
 def ul_list_to_html_node(block):
-    node_list = block.split("\n")
-    #print("Original block (raw):", repr(block))
-    #print("Split lines:")
-    #for i, line in enumerate(node_list):
-        #print(f"Line {i}: '{line}', Raw: {repr(line)}")
-    #node_list = re.findall(r"^(\s*)\*(.*)",block,flags=re.M)
-    #stripped_string = (re.sub(r"^[\-\*]","", x) for x in node_list)
-    #print(stripped_string)
-    child_node = []
-    indentation = 0
-    old_indentation = 0
-    ul_depth = 0
-    #for x in stripped_string:
-        #print(x)
-    for n in node_list:
-        if n:
-            print("n:", n)
-            pattern_match = re.match(r"^(\s*)\*(.*)",n)
-            if pattern_match:  # Make sure there was a match
-                indentation = len(pattern_match.group(1))
-                content = pattern_match.group(2).strip()  # Get the content and remove leading/trailing spaces
-                print("Matched indent:", indentation)
-                print("Content: ", content)
-                if indentation >= old_indentation + 2:
-                    ul_depth += 1
-                elif indentation <= old_indentation - 2:
-                    ul_depth -= 1
+    lines = block.split("\n")
+    
+    # Stack: each element is [ul_node, depth_level]
+    stack = []
 
-                child_text_node = text_to_textnodes(content)
-                # Check if the text node is empty
-                html_node_list = []
-                if child_text_node:
-                    # Convert TextNodes to HTMLNodes
-                    html_node_list = [text_node_to_html_node(node) for node in child_text_node]
-                if html_node_list:
-                    # Append the HTMLNode to the child_node list
-                    child_node.append(ParentNode("li", html_node_list))
-    print(child_node)
-    return ParentNode(BlockType.UNORDERED_LIST.value, child_node)
+    for line in lines:
+        if line.strip():
+            match = re.match(r"^(\s*)\*(.*)", line)
+            if match:
+                current_depth = len(match.group(1))
+                content = match.group(2).strip()
+                
+                # Create the <li> element
+                text_nodes = text_to_textnodes(content)
+                html_nodes = [text_node_to_html_node(node) for node in text_nodes]
+                li_node = ParentNode("li", html_nodes)
+                
+                if not stack:
+                    # First item, create root
+                    stack.append([ParentNode("ul", [li_node]), current_depth])
+                
+                elif current_depth > stack[-1][1]:
+                    # Deeper level, create new <ul> and push to stack
+                    new_ul = ParentNode("ul", [li_node])
+                    stack[-1][0].children[-1].children.append(new_ul)
+                    stack.append([new_ul, current_depth])
+                
+                elif current_depth == stack[-1][1]:
+                    # Same level - just add to current ul
+                    stack[-1][0].children.append(li_node)
+                
+                elif current_depth < stack[-1][1]:
+                    # Same or shallower level
+                    while stack and current_depth < stack[-1][1]:
+                        stack.pop()
+                        
+                    if stack:
+                        stack[-1][0].children.append(li_node)
+                    else:
+                        # If stack is empty, we are back to root level
+                        stack.append([ParentNode("ul", [li_node]), current_depth])
+                #print(f"Stack after processing line '{line}': {stack}\n")
+    
+    # Return the root <ul>
+    return stack[0][0] if stack else ParentNode("ul", [])
 
 def ol_list_to_html_node(block):
+    lines = block.split("\n")
+    
+    # Stack: each element is [ul_node, depth_level]
+    stack = []
+
+    for line in lines:
+        if line.strip():
+            match = re.match(r"^(\s*)\d\.(.*)", line)
+            if match:
+                current_depth = len(match.group(1))
+                content = match.group(2).strip()
+                
+                # Create the <li> element
+                text_nodes = text_to_textnodes(content)
+                html_nodes = [text_node_to_html_node(node) for node in text_nodes]
+                li_node = ParentNode("li", html_nodes)
+                
+                if not stack:
+                    # First item, create root
+                    stack.append([ParentNode("ol", [li_node]), current_depth])
+                
+                elif current_depth > stack[-1][1]:
+                    # Deeper level, create new <ul> and push to stack
+                    new_ol = ParentNode("ol", [li_node])
+                    stack[-1][0].children[-1].children.append(new_ol)
+                    stack.append([new_ol, current_depth])
+                
+                elif current_depth == stack[-1][1]:
+                    # Same level - just add to current ul
+                    stack[-1][0].children.append(li_node)
+                
+                elif current_depth < stack[-1][1]:
+                    # Same or shallower level
+                    while stack and current_depth < stack[-1][1]:
+                        stack.pop()
+                        
+                    if stack:
+                        stack[-1][0].children.append(li_node)
+                    else:
+                        # If stack is empty, we are back to root level
+                        stack.append([ParentNode("ol", [li_node]), current_depth])
+                #print(f"Stack after processing line '{line}': {stack}\n")
+    
+    # Return the root <ul>
+    return stack[0][0] if stack else ParentNode("ul", [])
+
+#def ol_list_to_html_node(block):
     # Create an ordered list node
     # Strip the numbers from the list lines
     node_list = block.split("\n")
@@ -163,14 +219,9 @@ def remove_empty_lists(list_of_lists):
 class TestBlockToHtml(unittest.TestCase):
 
     def test_paragraphs(self):
-        md = """
-    This is **bolded** paragraph
-    text in a p
-    tag here
+        md = """This is **bolded** paragraph text in a p tag here
 
-    This is another paragraph with _italic_ text and `code` here
-
-    """
+This is another paragraph with _italic_ text and `code` here"""
 
         node = markdown_to_html_node(md)
         html = node.to_html()
@@ -181,23 +232,25 @@ class TestBlockToHtml(unittest.TestCase):
 
     def test_codeblock(self):
         self.maxDiff = None
-        md = """
-```
+        print("----- test_codeblock -----")
+        md = """```
 This is text that _should_ remain
 the **same** even with inline stuff
-```
-"""
-
+```"""
+        print(f"Markdown input:\n{md}\n")
         node = markdown_to_html_node(md)
+        print("Testing Node:", node)
         html = node.to_html()
+        print("Testing HTML:", html)
+        print("----- end test_codeblock -----\n")
         self.assertEqual(
             html,
-            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff</code></pre></div>",
         )
 
     def test_mixed_content(self):
-        md = """
-# Heading 1
+        print("----- test_mixed_content -----")
+        md = """# Heading 1
 
 This is a paragraph with **bold** and _italic_ text.
 
@@ -213,23 +266,40 @@ This is a paragraph with **bold** and _italic_ text.
 ```code
 function test() {
 return true;
-}```
-"""
+}
+```"""
         node = markdown_to_html_node(md)
         html = node.to_html()
+        print("Generated HTML:", html)
         expected_html = (
-            "<div>"
-            "<h1>Heading 1</h1>"
-            "<p>This is a paragraph with <b>bold</b> and <i>italic</i> text.</p>"
-            "<h2>Heading 2</h2>"
-            "<ul><li>List item 1</li><li>List item 2<ul><li>Nested item</li></ul></li></ul>"
-            "<blockquote>This is a blockquote<br/>with multiple lines</blockquote>"
-            "<pre><code>function test() {\nreturn true;\n}</code></pre>"
-            "</div>"
+            "<div><h1>Heading 1</h1><p>This is a paragraph with <b>bold</b> and <i>italic</i> text.</p><h2>Heading 2</h2><ul><li>List item 1</li><li>List item 2<ul><li>Nested item</li></ul></li></ul><blockquote>This is a blockquote<br/>with multiple lines</blockquote><pre><code>function test() {\nreturn true;\n}</code></pre></div>"
         )
         self.maxDiff = None
+        print("----- end test_mixed_content -----\n")
         self.assertEqual(html, expected_html)
         
+    def test_ul_list(self):
+        print("----- test_ul_list -----")
+        md = """* Item 1\n* Item 2\n  * Subitem 2.1\n  * Subitem 2.2\n* Item 3"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        print("Generated HTML:", html)
+        expected_html = "<div><ul><li>Item 1</li><li>Item 2<ul><li>Subitem 2.1</li><li>Subitem 2.2</li></ul></li><li>Item 3</li></ul></div>"
+        self.maxDiff = None
+        print("----- end test_ul_list -----\n")
+        self.assertEqual(html, expected_html)
+
+    def test_ol_list(self):
+        print("----- test_ol_list -----")
+        md = """1. Item 1\n2. Item 2\n  3. Subitem 2.1\n  4. Subitem 2.2\n5. Item 3"""
+        print(f"Markdown input:\n{md}\n")
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        print("Generated HTML:", html)
+        expected_html = "<div><ol><li>Item 1</li><li>Item 2<ol><li>Subitem 2.1</li><li>Subitem 2.2</li></ol></li><li>Item 3</li></ol></div>"
+        self.maxDiff = None
+        print("----- end test_ol_list -----\n")
+        self.assertEqual(html, expected_html)
 
 if __name__ == "__main__":
     unittest.main()
