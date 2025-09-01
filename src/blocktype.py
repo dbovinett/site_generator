@@ -50,7 +50,7 @@ def block_to_block_type(block:str) -> BlockType:
     elif len(re.findall(r"^>", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
         #print(f"Block identified as QUOTE:\n{block}\n")
         return BlockType.QUOTE
-    elif len(re.findall(r"[\-\*]", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
+    elif len(re.findall(r"(^\-|^\*\s)", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:
         #print(f"Block identified as UNORDERED_LIST:\n{block}\n")
         return BlockType.UNORDERED_LIST
     #elif len(re.findall(r"^\d+\.\s", block, re.M)) == len(re.findall(r"\n", block, re.M))+1:

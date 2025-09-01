@@ -9,7 +9,33 @@ def main():
     #test = TextNode("This is some anchor text", TextType.IMAGE, "https://www.boot.dev")
     #print(test)
     copy_from_to("static", "public")
-    generate_page("./content/index.md", "./template.html", "./public/index.html")
+    print (f"Files in content: {listdir('./content')}\n")
+    generate_pages_recursive("./content", "./template.html", "./public")
+    #generate_page("./content/index.md", "./template.html", "./public/index.html")
+    #generate_page("./content/index.md", "./template.html", "./public/index.html")
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    # Recursively generate pages from markdown files in dir_path_content
+    # and save them to dest_dir_path using template_path
+    # dir_path_content: path to content directory
+    # template_path: path to html template file
+    # dest_dir_path: path to output directory
+
+    dir_listing = listdir(dir_path_content)
+    print(f"Directory listing for {dir_path_content}: {dir_listing}\n")
+    for item in dir_listing:
+        if path.isdir(path.join(dir_path_content, item)):
+            print(f"Entering directory {item}\n")
+            new_dest_dir = path.join(dest_dir_path, item)
+            if not path.exists(new_dest_dir):
+                mkdir(new_dest_dir)
+            generate_pages_recursive(path.join(dir_path_content, item), template_path, new_dest_dir)
+        elif path.isfile(path.join(dir_path_content, item)) and item.endswith(".md"):
+            print(f"Processing file {item}\n")
+            dest_file = item.replace(".md", ".html")
+            generate_page(path.join(dir_path_content, item), template_path, path.join(dest_dir_path, dest_file))
+        else:
+            print(f"Skipping non-markdown file {item}\n")
 
 def copy_from_to(source, destination):
 
@@ -84,17 +110,23 @@ def generate_page(from_path, template_path, dest_path):
     # template_path: path to html template file
     # dest_path: path to output html file
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
-    abs_from_path = path.abspath(from_path)
-    abs_template_path = path.abspath(template_path)
-    abs_dest_path = path.abspath(dest_path)
+    #abs_from_path = path.abspath(from_path)
+    #abs_template_path = path.abspath(template_path)
+    #abs_dest_path = path.abspath(dest_path)
     with open(from_path) as f:
         content = f.read()
     with open(template_path) as f:
         template = f.read()
     converted_content = markdown_to_html_node(content)
     converted_content = converted_content.to_html()
-    #print (f"\nconverted_content: {converted_content}\n")
-
+    #print (f"\nConverted_content: {converted_content}\n")
+    title = extract_title(content)
+    #print (f"\nTitle: {title}\n")
+    #print(f"\nTemplate before: {template}\n")
+    converted_template = template.replace("{{ Content }}", converted_content)
+    converted_template = converted_template.replace("{{ Title }}", title)
+    with open(dest_path, "w") as f:
+        f.write(converted_template)
     pass
 
 class TestExtractTitle(unittest.TestCase):

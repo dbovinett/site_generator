@@ -14,7 +14,9 @@ def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     html_nodes = []
     for block in blocks:
+        print(f"\nBlock: '{block}'")
         block_type = block_to_block_type(block)
+        print(f"Block type: {block_type}\n")
         match block_type:
             case BlockType.PARAGRAPH:
                 html_nodes.append(paragraph_to_html_node(block))
@@ -101,18 +103,19 @@ def quote_to_html_node(block):
     return ParentNode(BlockType.QUOTE.value, html_nodes)
 
 def ul_list_to_html_node(block):
-    #print("----- ul_list_to_html_node -----")
+    print("----- ul_list_to_html_node -----")
     lines = block.split("\n")
     #print(f"Lines: {lines}\n")
     # Stack: each element is [ul_node, depth_level]
     stack = []
 
     for line in lines:
-        #print(f"Processing line: '{line}'")
+        print(f"Processing line: '{line}'")
         if line.strip():
-            match = re.match(r"^(\s*)\*|-(.*)", line)
-            #print (f"Match: {match}\n")
+            match = re.match(r"^(\s*)\*\s|-\s(.*)", line)
+            print (f"Match: {match}\n")
             if match:
+                print(f"\nMatch groups: {match.groups()}\n")
                 if match.group(1) is None:
                     #print(f"\nNo leading spaces found in line '{line}'\n")
                     current_depth = 0
@@ -155,6 +158,7 @@ def ul_list_to_html_node(block):
     
     # Return the root <ul>
     #print(f"\nFinal Stack: {stack}\n")
+    print("----- end ul_list_to_html_node -----\n")
     return stack[0][0] if stack else ParentNode("ul", [])
 
 def ol_list_to_html_node(block):
@@ -167,7 +171,12 @@ def ol_list_to_html_node(block):
         if line.strip():
             match = re.match(r"^(\s*)\d\.(.*)", line)
             if match:
-                current_depth = len(match.group(1))
+                if match.group(1) is None:
+                    print(f"\nNo leading spaces found in line '{line}'\n")
+                    current_depth = 0
+                else:
+                    current_depth = len(match.group(1))
+                #current_depth = len(match.group(1))
                 content = match.group(2).strip()
                 
                 # Create the <li> element
