@@ -1,12 +1,15 @@
 from textnode import *
 from shutil import *
-from os import *
+from os import listdir, path, mkdir  
+from block_to_html import markdown_to_html_node
+from parentnode import *
 import unittest
 
 def main():
     #test = TextNode("This is some anchor text", TextType.IMAGE, "https://www.boot.dev")
     #print(test)
     copy_from_to("static", "public")
+    generate_page("./content/index.md", "./template.html", "./public/index.html")
 
 def copy_from_to(source, destination):
 
@@ -76,6 +79,24 @@ def extract_title(markdown):
             return line[2:]
     raise ValueError("No title found in markdown")
 
+def generate_page(from_path, template_path, dest_path):
+    # from_path: path to markdown file
+    # template_path: path to html template file
+    # dest_path: path to output html file
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    abs_from_path = path.abspath(from_path)
+    abs_template_path = path.abspath(template_path)
+    abs_dest_path = path.abspath(dest_path)
+    with open(from_path) as f:
+        content = f.read()
+    with open(template_path) as f:
+        template = f.read()
+    converted_content = markdown_to_html_node(content)
+    converted_content = converted_content.to_html()
+    #print (f"\nconverted_content: {converted_content}\n")
+
+    pass
+
 class TestExtractTitle(unittest.TestCase):
     def test_extract_title(self):
         md = """# This is the title"""
@@ -87,7 +108,8 @@ class TestExtractTitle(unittest.TestCase):
         with self.assertRaises(ValueError):
             extract_title(md)
 
-if __name__ == "__main__":
-    unittest.main()
+
+#if __name__ == "__main__":
+    #unittest.main()
 
 main()

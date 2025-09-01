@@ -101,25 +101,34 @@ def quote_to_html_node(block):
     return ParentNode(BlockType.QUOTE.value, html_nodes)
 
 def ul_list_to_html_node(block):
+    #print("----- ul_list_to_html_node -----")
     lines = block.split("\n")
-    
+    #print(f"Lines: {lines}\n")
     # Stack: each element is [ul_node, depth_level]
     stack = []
 
     for line in lines:
+        #print(f"Processing line: '{line}'")
         if line.strip():
-            match = re.match(r"^(\s*)\*(.*)", line)
+            match = re.match(r"^(\s*)\*|-(.*)", line)
+            #print (f"Match: {match}\n")
             if match:
-                current_depth = len(match.group(1))
+                if match.group(1) is None:
+                    #print(f"\nNo leading spaces found in line '{line}'\n")
+                    current_depth = 0
+                else:
+                    current_depth = len(match.group(1))
                 content = match.group(2).strip()
                 
                 # Create the <li> element
                 text_nodes = text_to_textnodes(content)
                 html_nodes = [text_node_to_html_node(node) for node in text_nodes]
+                #print(f"\nHTML Nodes for line '{line}': {html_nodes}\n")
                 li_node = ParentNode("li", html_nodes)
                 
                 if not stack:
                     # First item, create root
+                    #print(f"\nCreating root ul for line '{line}'\n")
                     stack.append([ParentNode("ul", [li_node]), current_depth])
                 
                 elif current_depth > stack[-1][1]:
@@ -145,6 +154,7 @@ def ul_list_to_html_node(block):
                 #print(f"Stack after processing line '{line}': {stack}\n")
     
     # Return the root <ul>
+    #print(f"\nFinal Stack: {stack}\n")
     return stack[0][0] if stack else ParentNode("ul", [])
 
 def ol_list_to_html_node(block):

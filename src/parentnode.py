@@ -19,10 +19,15 @@ class ParentNode(HTMLNode):
         """
         children_html = ""
         #children_html = "".join([child.to_html() for child in self.children])
+        #print(f"\nParentNode: {self}\n")
+        #print(f"\nParentNode tag: {self.tag}\n")
+        #print(f"\nParentNode children: {self.children}\n")
         if isinstance(self.children, list):
             children_html = "".join([child.to_html() for child in self.children if child is not None])
+            #print(f"\nParentNode children_html: {children_html}\n")
         else:
             raise ValueError("ParentNode children must be a list")
         if children_html == "":
             raise ValueError("ParentNode children cannot be empty")
+        #print(f"\nHTML: <{self.tag}{self.prop_to_html()}>{children_html}</{self.tag}>\n")
         return f"<{self.tag}{self.prop_to_html()}>{children_html}</{self.tag}>"
